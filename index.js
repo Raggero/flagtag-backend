@@ -64,7 +64,7 @@ app.post("/users",
             })
         }
 
-        const insertQuery ='INSERT INTO users (userName, userPassword) VALUES (?,?)'
+        const insertQuery ='INSERT INTO user (userName, userPassword) VALUES (?,?)'
         let params =[req.body.username, req.body.password]
         db.run(insertQuery, params, function (err, result) {
             if (err){
@@ -78,7 +78,7 @@ app.post("/users",
                 else{
                     let responseError = {error: err.message}
                     error.push(responseError)
-                    res.status(400).json({success: false, errors: responseError})
+                    res.status(400).json({success: false, errors: error})
                 }
                 return;
             }
