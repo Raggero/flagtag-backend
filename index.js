@@ -47,6 +47,8 @@ app.get("/users/:name/:password", (req, res, next) => {
     });
 });
 
+// Add new user to database. Validates that username is unique and at at least 2 characters and that
+// password is at least two characters.
 app.post("/users",
     body('username', "The username must be minimum 2 characters").isLength({min: 2}),
     body('password', "The password must be minimum 2 characters").isLength({min: 2}),
@@ -54,7 +56,7 @@ app.post("/users",
         console.log(req.body.username);
         console.log(req.body.password);
 
-        const errors = validationResult(req);
+        let errors = validationResult(req);
         if(!errors.isEmpty()){
             return res.status(400).json({
                 success: false,
@@ -67,11 +69,16 @@ app.post("/users",
         db.run(insertQuery, params, function (err, result) {
             if (err){
                 const checkUserError = "SQLITE_CONSTRAINT: UNIQUE constraint failed: users.userName"
+                let error = [];
                 if(err.message === checkUserError){
-                    res.status(409).json({success: false, msg:'Username already taken'})
+                    let responseMsg = {value: req.body.username ,msg: "Username already taken", param: "username"}
+                    error.push(responseMsg)
+                    res.status(409).json({success: false, errors: error})
                 }
                 else{
-                    res.status(400).json({success: false, error: err.message})
+                    let responseError = {error: err.message}
+                    error.push(responseError)
+                    res.status(400).json({success: false, errors: responseError})
                 }
                 return;
             }
