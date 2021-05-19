@@ -97,7 +97,8 @@ app.post("/users",
 //Search by name and password. If no such user exists returns empty json.
 //ex localhost:3000/users/Helena/asd
 app.put("/users/update", (req, res, next) => {
-    const searchQuery = "update users set userName=? where id = ?"
+    body('newUser', "The username must be minimum 2 characters").isLength({min: 2})
+    const searchQuery = "update users set userName=? where userId = ?"
     let params =[req.params.newUser, req.params.id]
     console.log(params);
     db.run(searchQuery, params, (error, rows) => {
