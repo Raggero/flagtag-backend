@@ -99,7 +99,7 @@ app.post("/users",
 app.put("/users/update", (req, res, next) => {
     body('newUser', "The username must be minimum 2 characters").isLength({min: 2})
     const searchQuery = "update users set userName=? where userId = ?"
-    let params =[req.params.newUser, req.params.id]
+    let params =[req.body.newUser, req.body.userId]
     console.log(params);
     db.run(searchQuery, params, (error, rows) => {
         if (error) {
@@ -110,8 +110,8 @@ app.put("/users/update", (req, res, next) => {
             success: true,
             message: 'Username updated',
             "user": {
-                "userId" : req.params.id,
-                username: req.params.name,
+                "userId" : req.body.id,
+                username: req.body.name,
             }
         })
     });
