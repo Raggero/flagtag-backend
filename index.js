@@ -96,8 +96,18 @@ app.post("/users",
 
 //Search by name and password. If no such user exists returns empty json.
 //ex localhost:3000/users/Helena/asd
-app.put("/users/update", (req, res, next) => {
-    body('newUser', "The username must be minimum 2 characters").isLength({min: 2})
+app.put("/users/update",
+    body('newUser', "The username must be minimum 2 characters").isLength({min: 2}),
+    (req, res, next) => {
+
+    let errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).json({
+            success: false,
+            errors: errors.array()
+        })
+    }
+
     const searchQuery = "update users set userName=? where userId = ?"
     let params =[req.body.newUser, req.body.userId]
     console.log(params);
@@ -110,8 +120,8 @@ app.put("/users/update", (req, res, next) => {
             success: true,
             message: 'Username updated',
             "user": {
-                "userId" : req.body.id,
-                username: req.body.name,
+                "userId" : req.body.userId,
+                "username" : req.body.newUser,
             }
         })
     });
