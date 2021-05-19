@@ -11,7 +11,8 @@ let db = new sqlite3.Database(DBSOURCE, (error) => {
         db.run(`CREATE TABLE users (
             userId INTEGER PRIMARY KEY,
             userName TEXT UNIQUE,
-            userPassword TEXT
+            userPassword TEXT,
+            highScore INTEGER
             )`,(error) => {
             if (error) {
                 // Table already created

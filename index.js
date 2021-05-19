@@ -94,4 +94,27 @@ app.post("/users",
         });
     });
 
+app.post("/highScore",
+    (req ,res , next )=> {
+    console.log(req.body.userId);
+    console.log(req.body.highScore);
+        const insertQuery ='UPDATE users SET highScore = (?) WHERE userId = (?)'
+        let params =[req.body.highScore, req.body.userId]
+        db.run(insertQuery, params, function (){
+            res.status(200)
+            //Error handling not fixed
+        },
+        res.json({
+            success: true,
+            message: 'Highscore Saved',
+            "highscore" : {
+                "userId" : req.body.userId,
+                "highScore" : req.body.highScore
+            }
+        })
+        )
+    }
+)
+
+
 
