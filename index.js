@@ -94,4 +94,24 @@ app.post("/users",
         });
     });
 
-
+//Search by name and password. If no such user exists returns empty json.
+//ex localhost:3000/users/Helena/asd
+app.put("/users/update", (req, res, next) => {
+    const searchQuery = "update users set userName=? where id = ?"
+    let params =[req.params.newUser, req.params.id]
+    console.log(params);
+    db.run(searchQuery, params, (error, rows) => {
+        if (error) {
+            res.status(400).json({"error":error.message});
+            return;
+        }
+        res.json({
+            success: true,
+            message: 'Username updated',
+            "user": {
+                "userId" : req.params.id,
+                username: req.params.name,
+            }
+        })
+    });
+});
