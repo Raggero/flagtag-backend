@@ -94,8 +94,28 @@ app.post("/users",
         });
     });
 
-//Search by name and password. If no such user exists returns empty json.
-//ex localhost:3000/users/Helena/asd
+
+app.post("/highScore",
+    (req ,res , next )=> {
+    console.log(req.body.userId);
+    console.log(req.body.highScore);
+        const insertQuery ='UPDATE users SET highScore = (?) WHERE userId = (?)'
+        let params =[req.body.highScore, req.body.userId]
+        db.run(insertQuery, params, function (){
+            res.status(200)
+            //Error handling not fixed
+        },
+        res.json({
+            success: true,
+            message: 'Highscore Saved',
+            "highscore" : {
+                "userId" : req.body.userId,
+                "highScore" : req.body.highScore
+            }
+        })
+        )
+    }
+)
 app.put("/users/update",
     body('newUser', "The username must be minimum 2 characters").isLength({min: 2}),
     (req, res, next) => {
