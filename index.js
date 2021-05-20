@@ -94,6 +94,7 @@ app.post("/users",
         });
     });
 
+
 app.post("/highScore",
     (req ,res , next )=> {
     console.log(req.body.userId);
@@ -115,6 +116,33 @@ app.post("/highScore",
         )
     }
 )
+app.put("/users/update",
+    body('newUser', "The username must be minimum 2 characters").isLength({min: 2}),
+    (req, res, next) => {
 
+    let errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).json({
+            success: false,
+            errors: errors.array()
+        })
+    }
 
-
+    const searchQuery = "update users set userName=? where userId = ?"
+    let params =[req.body.newUser, req.body.userId]
+    console.log(params);
+    db.run(searchQuery, params, (error, rows) => {
+        if (error) {
+            res.status(400).json({"error":error.message});
+            return;
+        }
+        res.json({
+            success: true,
+            message: 'Username updated',
+            "user": {
+                "userId" : req.body.userId,
+                "username" : req.body.newUser,
+            }
+        })
+    });
+});
