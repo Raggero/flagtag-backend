@@ -146,3 +146,18 @@ app.put("/users/update",
         })
     });
 });
+
+app.get("/highscore", (req, res, next) => {
+    const searchQuery = "select * from users order by highscore desc limit 5"
+    let params = []
+    db.all(searchQuery, params, (error, rows) => {
+        if (error) {
+            res.status(400).json({"error":error.message});
+            return;
+        }
+        res.json({
+            success:true,
+            "users":rows
+        });
+    });
+});
