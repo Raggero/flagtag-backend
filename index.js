@@ -131,9 +131,20 @@ app.put("/users/update",
     const searchQuery = "update users set userName=? where userId = ?"
     let params =[req.body.newUser, req.body.userId]
     console.log(params);
-    db.run(searchQuery, params, (error, rows) => {
-        if (error) {
-            res.status(400).json({"error":error.message});
+    db.run(searchQuery, params, (err, rows) => {
+        if(err){
+            const checkUserError = "SQLITE_CONSTRAINT: UNIQUE constraint failed: users.userName"
+            let error = [];
+            if(err.message === checkUserError){
+                let responseMsg = {value: req.body.username ,msg: "Username already taken", param: "username"}
+                error.push(responseMsg)
+                res.status(409).json({success: false, errors: error})
+            }
+            else{
+                let responseError = {error: err.message}
+                error.push(responseError)
+                res.status(400).json({success: false, errors: error})
+            }
             return;
         }
         res.json({
