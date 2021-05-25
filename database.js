@@ -12,12 +12,12 @@ let db = new sqlite3.Database(DBSOURCE, (error) => {
             "userId"	INTEGER,
             "userName"	TEXT UNIQUE,
             "userPassword"	TEXT,
-            "highScoreAllRegions"	INTEGER,
-            "highScoreAsia"	INTEGER,
-            "highScoreEurope"	INTEGER,
-            "highScoreAfrica"	INTEGER,
-            "highScoreAmericas"	INTEGER,
-            "highScoreOceania"	INTEGER,
+            "highScoreAllRegions"	INTEGER DEFAULT 0,
+            "highScoreAsia"	INTEGER DEFAULT 0,
+            "highScoreEurope"	INTEGER DEFAULT 0,
+            "highScoreAfrica"	INTEGER DEFAULT 0,
+            "highScoreAmericas"	INTEGER DEFAULT 0,
+            "highScoreOceania"	INTEGER DEFAULT 0,
             PRIMARY KEY("userId")
             )`,(error) => {
             if (error) {
