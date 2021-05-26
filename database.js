@@ -8,11 +8,17 @@ let db = new sqlite3.Database(DBSOURCE, (error) => {
         throw error
     }else{
         console.log('Connected to the SQlite database.')
-        db.run(`CREATE TABLE users (
-            userId INTEGER PRIMARY KEY,
-            userName TEXT UNIQUE,
-            userPassword TEXT,
-            highScore INTEGER
+        db.run(`CREATE TABLE "users" (
+            "userId"	INTEGER,
+            "userName"	TEXT UNIQUE,
+            "userPassword"	TEXT,
+            "highScoreAllRegions"	INTEGER DEFAULT 0,
+            "highScoreAsia"	INTEGER DEFAULT 0,
+            "highScoreEurope"	INTEGER DEFAULT 0,
+            "highScoreAfrica"	INTEGER DEFAULT 0,
+            "highScoreAmericas"	INTEGER DEFAULT 0,
+            "highScoreOceania"	INTEGER DEFAULT 0,
+            PRIMARY KEY("userId")
             )`,(error) => {
             if (error) {
                 // Table already created

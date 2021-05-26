@@ -99,18 +99,24 @@ app.post("/highScore",
     (req ,res , next )=> {
     console.log(req.body.userId);
     console.log(req.body.highScore);
-        const insertQuery ='UPDATE users SET highScore = (?) WHERE userId = (?)'
+    console.log(req.body.region)
+    let regionColumn = "highScore" + req.body.region
+        const insertQuery =`UPDATE users SET ${regionColumn} = (?) WHERE userId = (?)`
         let params =[req.body.highScore, req.body.userId]
         db.run(insertQuery, params, function (){
             res.status(200)
             //Error handling not fixed
+            if(error){
+                console.log(error)
+            }
         },
         res.json({
             success: true,
             message: 'Highscore Saved',
             "highscore" : {
                 "userId" : req.body.userId,
-                "highScore" : req.body.highScore
+                "highScore" : req.body.highScore,
+                "region": req.body.region
             }
         })
         )
@@ -159,7 +165,7 @@ app.put("/users/update",
 });
 
 app.get("/highscore", (req, res, next) => {
-    const searchQuery = "select * from users order by highscore desc limit 5"
+    const searchQuery = "select * from users order by highscoreAllRegions desc limit 5"
     let params = []
     db.all(searchQuery, params, (error, rows) => {
         if (error) {
