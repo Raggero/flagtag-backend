@@ -17,7 +17,7 @@ app.listen(port, () => {
 
 //Returns all users in database
 app.get("/users", (req, res, next) => {
-    const sqlQuery = "select * from users"
+    const sqlQuery = "SELECT * FROM users"
     let params = []
     db.all(sqlQuery, params, (error, rows) => {
         if (error) {
@@ -33,7 +33,7 @@ app.get("/users", (req, res, next) => {
 //Search by name and password. If no such user exists returns empty json.
 //ex localhost:3000/users/Helena/asd
 app.get("/users/:name/:password", (req, res, next) => {
-    const searchQuery = "select * from users where userName = ? AND userPassword = ?"
+    const searchQuery = "SELECT * FROM users WHERE userName = ? AND userPassword = ?"
     let params =[req.params.name, req.params.password]
     console.log(params);
     db.all(searchQuery, params, (error, rows) => {
@@ -94,6 +94,77 @@ app.post("/users",
         });
     });
 
+app.put("/users/update",
+    body('newUser', "The username must be minimum 2 characters").isLength({min: 2}),
+    (req, res, next) => {
+
+        let errors = validationResult(req);
+        if(!errors.isEmpty()){
+            return res.status(400).json({
+                success: false,
+                errors: errors.array()
+            })
+        }
+
+        const searchQuery = "UPDATE users SET userName=? WHERE userId = ?"
+        let params =[req.body.newUser, req.body.userId]
+        console.log(params);
+        db.run(searchQuery, params, (err, rows) => {
+            if(err){
+                const checkUserError = "SQLITE_CONSTRAINT: UNIQUE constraint failed: users.userName"
+                let error = [];
+                if(err.message === checkUserError){
+                    let responseMsg = {value: req.body.username ,msg: "Username already taken", param: "username"}
+                    error.push(responseMsg)
+                    res.status(409).json({success: false, errors: error})
+                }
+                else{
+                    let responseError = {error: err.message}
+                    error.push(responseError)
+                    res.status(400).json({success: false, errors: error})
+                }
+                return;
+            }
+            res.json({
+                success: true,
+                message: 'Username updated',
+                "user": {
+                    "userId" : req.body.userId,
+                    "username" : req.body.newUser,
+                }
+            })
+        });
+    });
+
+app.delete("/users/:name", (req, res, next) => {
+    const sqlQuery = "DELETE FROM users WHERE userName = ?"
+    let params =[req.params.name]
+    db.all(sqlQuery, params, (error, rows) => {
+        if (error) {
+            res.status(400).json({"error":error.message});
+            return;
+        }
+        res.json({
+            success:true,
+            rows:rows
+        })
+    });
+});
+
+app.get("/highscore", (req, res, next) => {
+    const searchQuery = "SELECT * FROM users ORDER BY highscoreAllRegions desc LIMIT 5"
+    let params = []
+    db.all(searchQuery, params, (error, rows) => {
+        if (error) {
+            res.status(400).json({"error":error.message});
+            return;
+        }
+        res.json({
+            success:true,
+            "users":rows
+        });
+    });
+});
 
 app.post("/highScore",
     (req ,res , next )=> {
@@ -122,59 +193,31 @@ app.post("/highScore",
         )
     }
 )
-app.put("/users/update",
-    body('newUser', "The username must be minimum 2 characters").isLength({min: 2}),
-    (req, res, next) => {
 
-    let errors = validationResult(req);
-    if(!errors.isEmpty()){
-        return res.status(400).json({
-            success: false,
-            errors: errors.array()
-        })
-    }
-
-    const searchQuery = "update users set userName=? where userId = ?"
-    let params =[req.body.newUser, req.body.userId]
-    console.log(params);
-    db.run(searchQuery, params, (err, rows) => {
-        if(err){
-            const checkUserError = "SQLITE_CONSTRAINT: UNIQUE constraint failed: users.userName"
-            let error = [];
-            if(err.message === checkUserError){
-                let responseMsg = {value: req.body.username ,msg: "Username already taken", param: "username"}
-                error.push(responseMsg)
-                res.status(409).json({success: false, errors: error})
-            }
-            else{
-                let responseError = {error: err.message}
-                error.push(responseError)
-                res.status(400).json({success: false, errors: error})
-            }
-            return;
-        }
-        res.json({
-            success: true,
-            message: 'Username updated',
-            "user": {
-                "userId" : req.body.userId,
-                "username" : req.body.newUser,
-            }
-        })
-    });
-});
-
-app.get("/highscore", (req, res, next) => {
-    const searchQuery = "select * from users order by highscoreAllRegions desc limit 5"
+app.put("/highscore", (req, res, next) => {
+    const sqlQuery = "UPDATE users SET highScoreAllRegions = 0"
     let params = []
-    db.all(searchQuery, params, (error, rows) => {
+    db.all(sqlQuery, params, (error, rows) => {
         if (error) {
             res.status(400).json({"error":error.message});
             return;
         }
         res.json({
-            success:true,
-            "users":rows
-        });
+            success:true
+        })
+    });
+});
+
+app.put("/highscore/:id", (req, res, next) => {
+    const sqlQuery = "UPDATE users SET highScoreAllRegions = 0 WHERE userId = ?"
+    let params =[req.params.id]
+    db.all(sqlQuery, params, (error, rows) => {
+        if (error) {
+            res.status(400).json({"error":error.message});
+            return;
+        }
+        res.json({
+            success:true
+        })
     });
 });
