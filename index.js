@@ -109,7 +109,7 @@ app.put("/users/update",
         const searchQuery = "UPDATE users SET userName=? WHERE userId = ?"
         let params =[req.body.newUser, req.body.userId]
         console.log(params);
-        db.run(searchQuery, params, (err, rows) => {
+        db.all(searchQuery, params, (err, rows) => {
             if(err){
                 const checkUserError = "SQLITE_CONSTRAINT: UNIQUE constraint failed: users.userName"
                 let error = [];
@@ -137,22 +137,39 @@ app.put("/users/update",
     });
 
 app.delete("/users/:name", (req, res, next) => {
-    const sqlQuery = "DELETE FROM users WHERE userName = ?"
-    let params =[req.params.name]
-    db.all(sqlQuery, params, (error, rows) => {
-        if (error) {
+    const searchQuery = "select * from users where userName = ?"
+    const deleteQuery = "DELETE FROM users WHERE userName = ?"
+    let params =req.params.name
+    let accountExists;
+
+    db.all(searchQuery, params, (error, result) =>{
+        if(error){
             res.status(400).json({"error":error.message});
-            return;
+            console.log(error.message)
         }
-        res.json({
-            success:true,
-            rows:rows
-        })
+        accountExists = result.length >= 1;
+
+        if(accountExists){
+            db.all(deleteQuery, params, (error, rows) => {
+                if (error) {
+                    res.status(400).json({"error":error.message});
+                    return;
+                }
+                res.json({
+                    success:true,
+                    msg:"Account deleted"
+                })
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                msg:"Account not found"});
+        }
     });
 });
 
 app.get("/highscore", (req, res, next) => {
-    const searchQuery = "SELECT * FROM users ORDER BY highscoreAllRegions desc LIMIT 5"
+    const searchQuery = "SELECT * FROM users WHERE userId >1 ORDER BY highscoreAllRegions desc LIMIT 5"
     let params = []
     db.all(searchQuery, params, (error, rows) => {
         if (error) {
@@ -208,16 +225,34 @@ app.put("/highscore", (req, res, next) => {
     });
 });
 
-app.put("/highscore/:id", (req, res, next) => {
-    const sqlQuery = "UPDATE users SET highScoreAllRegions = 0 WHERE userId = ?"
-    let params =[req.params.id]
-    db.all(sqlQuery, params, (error, rows) => {
-        if (error) {
+app.put("/highscore/:name", (req, res, next) => {
+    const searchQuery = "select * from users where userName = ?"
+    const updateQuery = "UPDATE users SET highScoreAllRegions = 0 WHERE userName = ?"
+    let params =req.params.name
+    let accountExists;
+
+    db.all(searchQuery, params, (error, result) =>{
+        if(error){
             res.status(400).json({"error":error.message});
-            return;
+            console.log(error.message)
         }
-        res.json({
-            success:true
-        })
+        accountExists = result.length >= 1;
+
+        if(accountExists){
+            db.all(updateQuery, params, (error, rows) => {
+                if (error) {
+                    res.status(400).json({"error":error.message});
+                    return;
+                }
+                res.json({
+                    success:true,
+                    msg:"Reset successful"
+                })
+            });
+        }else {
+            res.status(400).json({
+                success: false,
+                msg:"Account not found"});
+        }
     });
 });
