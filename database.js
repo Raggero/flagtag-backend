@@ -24,7 +24,8 @@ let db = new sqlite3.Database(DBSOURCE, (error) => {
                 // Table already created
             }else{
                 // Table created, inserting default users
-                var insert = 'INSERT INTO users (userName, userPassword) VALUES (?,?)'
+                let insert = 'INSERT INTO users (userName, userPassword) VALUES (?,?)'
+                db.run(insert, ["Admin","admin"])
                 db.run(insert, ["Helena","asd"])
                 db.run(insert, ["Albert","zxc"])
                 db.run(insert, ["Sean","qwe"])
